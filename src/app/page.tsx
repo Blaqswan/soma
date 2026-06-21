@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import MagazineCanvas from "@/components/MagazineCanvas";
 import { TextSectionData } from "@/components/TextSection";
 import { StyleObject } from "@/components/TypographyControls";
 import HtmlExport from "@/components/HtmlExport";
+import SaveLoadPanel from "@/components/SaveLoadPanel";
 import { generateHtml } from "@/lib/htmlGenerator";
-import { FileCode, Save, Sparkles } from "lucide-react";
+import { autoSaveDraft, updateDesign, DesignState, SavedDesign } from "@/lib/storageManager";
+import { FileCode, Save, Sparkles, FolderOpen } from "lucide-react";
 
 export default function Home() {
   // LIFTED STATES from MagazineCanvas
@@ -87,14 +89,89 @@ export default function Home() {
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [htmlCode, setHtmlCode] = useState("");
 
+  // Save/Load States
+  const [activeDesignId, setActiveDesignId] = useState<string | null>(null);
+  const [designName, setDesignName] = useState("Untitled Design");
+  const [isSaveLoadOpen, setIsSaveLoadOpen] = useState(false);
+  const [lastSavedText, setLastSavedText] = useState("");
+
+  // Auto-save logic (runs every 30 seconds if page is dirty)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const currentState: DesignState = {
+        backgroundImage,
+        heroHeader,
+        sections,
+      };
+
+      if (activeDesignId && activeDesignId !== "autosave") {
+        // Auto-save to currently loaded slot
+        const updated = updateDesign(activeDesignId, currentState);
+        if (updated) {
+          const time = new Date().toLocaleTimeString(undefined, {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          });
+          setLastSavedText(`Auto-saved at ${time}`);
+        }
+      } else {
+        // New workspace draft: Auto-save to special "Auto-saved Draft" slot
+        const drafted = autoSaveDraft(currentState);
+        if (drafted) {
+          const time = new Date().toLocaleTimeString(undefined, {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          });
+          setLastSavedText(`Draft auto-saved at ${time}`);
+        }
+      }
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [backgroundImage, heroHeader, sections, activeDesignId]);
+
   const handleExport = () => {
     const generated = generateHtml({ heroHeader, sections, backgroundImage });
     setHtmlCode(generated);
     setIsExportOpen(true);
   };
 
+  const handleDesignLoaded = (id: string, name: string, state: DesignState) => {
+    setActiveDesignId(id);
+    setDesignName(name);
+    setBackgroundImage(state.backgroundImage);
+    setHeroHeader(state.heroHeader);
+    setSections(state.sections);
+
+    const time = new Date().toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+    setLastSavedText(`Loaded at ${time}`);
+  };
+
+  const handleDesignSaved = (id: string, name: string) => {
+    if (id === "") {
+      setActiveDesignId(null);
+      setDesignName("Untitled Design");
+    } else {
+      setActiveDesignId(id);
+      setDesignName(name);
+    }
+
+    const time = new Date().toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+    setLastSavedText(`Saved at ${time}`);
+  };
+
   return (
-    <div className="flex flex-col min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 selection:bg-indigo-500 selection:text-white">
+    <div className="flex flex-col min-h-screen bg-zinc-50 dark:bg-zinc-955 text-zinc-900 dark:text-zinc-50 selection:bg-indigo-500 selection:text-white">
       {/* Header */}
       <header className="w-full max-w-7xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between border-b border-zinc-200/50 dark:border-zinc-800/50 gap-4">
         <div className="flex items-center gap-3">
@@ -102,8 +179,18 @@ export default function Home() {
             S
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight">SOMA</h1>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">Newsletter Designer</p>
+            <h1 className="text-xl font-bold tracking-tight flex items-center gap-2">
+              SOMA
+              {activeDesignId && (
+                <>
+                  <span className="text-zinc-300 dark:text-zinc-700 font-normal select-none">&bull;</span>
+                  <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 capitalize max-w-[120px] sm:max-w-[200px] truncate" title={designName}>
+                    {designName}
+                  </span>
+                </>
+              )}
+            </h1>
+            <p className="text-xs text-zinc-505 dark:text-zinc-400">Newsletter Designer</p>
           </div>
         </div>
 
@@ -122,17 +209,17 @@ export default function Home() {
           {/* Editor Action Buttons */}
           <div className="flex items-center gap-2">
             <button 
-              onClick={() => alert("Save Draft feature is coming soon!")}
+              onClick={() => setIsSaveLoadOpen(true)}
               className="flex items-center gap-1.5 px-3.5 py-2 border border-zinc-200 dark:border-zinc-800/60 bg-white hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-850 text-zinc-650 hover:text-zinc-850 dark:text-zinc-350 dark:hover:text-zinc-150 rounded-xl text-xs font-bold shadow-xs hover:shadow transition-all"
             >
-              <Save className="w-3.5 h-3.5" />
-              Save Draft
+              <FolderOpen className="w-3.5 h-3.5 text-indigo-500" />
+              Save & Load
             </button>
             <button 
               onClick={() => alert("Publish Cover feature is coming soon!")}
               className="flex items-center gap-1.5 px-3.5 py-2 border border-zinc-200 dark:border-zinc-800/60 bg-white hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-850 text-zinc-650 hover:text-zinc-850 dark:text-zinc-350 dark:hover:text-zinc-150 rounded-xl text-xs font-bold shadow-xs hover:shadow transition-all"
             >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-550 dark:text-indigo-400" />
+              <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
               Publish
             </button>
             <button 
@@ -211,6 +298,18 @@ export default function Home() {
         isOpen={isExportOpen}
         onClose={() => setIsExportOpen(false)}
         htmlCode={htmlCode}
+      />
+
+      {/* Save/Load Dialog overlay */}
+      <SaveLoadPanel
+        isOpen={isSaveLoadOpen}
+        onClose={() => setIsSaveLoadOpen(false)}
+        currentState={{ backgroundImage, heroHeader, sections }}
+        activeDesignId={activeDesignId}
+        designName={designName}
+        onDesignLoaded={handleDesignLoaded}
+        onDesignSaved={handleDesignSaved}
+        lastSavedText={lastSavedText}
       />
     </div>
   );
