@@ -2,11 +2,18 @@
 
 import React from "react";
 import { Edit3, ExternalLink } from "lucide-react";
+import { StyleObject } from "./TypographyControls";
 
 export interface TextSectionData {
   id: string;
-  title?: string;
-  body?: string;
+  title?: {
+    text: string;
+    style?: StyleObject;
+  };
+  body?: {
+    text: string;
+    style?: StyleObject;
+  };
   link?: string;
 }
 
@@ -21,16 +28,69 @@ export default function TextSection({
   onClick,
   hasBackground,
 }: TextSectionProps) {
-  const { title, body, link } = section;
+  const titleText = section.title?.text;
+  const bodyText = section.body?.text;
+  const link = section.link;
 
-  // Placeholder when both title and body are empty
-  const isEmpty = !title && !body;
+  const isEmpty = !titleText && !bodyText;
+
+  // Title Style Resolution
+  const titleStyle = section.title?.style || {
+    fontFamily: "Didot, 'Didot LT STD', Bodoni, Georgia, serif",
+    fontSize: "16px",
+    fontWeight: "bold",
+    fontStyle: "normal",
+    textAlign: "right",
+    color: "",
+  };
+
+  // Body Style Resolution
+  const bodyStyle = section.body?.style || {
+    fontFamily: "Arial, sans-serif",
+    fontSize: "12px",
+    fontWeight: "normal",
+    fontStyle: "normal",
+    textAlign: "right",
+    color: "",
+  };
+
+  // Default color fallbacks based on background presence
+  const resolvedTitleColor = titleStyle.color || (hasBackground ? "#ffffff" : "");
+  const resolvedBodyColor = bodyStyle.color || (hasBackground ? "#e4e4e7" : ""); // zinc-200/90
+
+  const titleCSS: React.CSSProperties = {
+    fontFamily: titleStyle.fontFamily,
+    fontSize: titleStyle.fontSize,
+    fontWeight: titleStyle.fontWeight,
+    fontStyle: titleStyle.fontStyle,
+    textAlign: titleStyle.textAlign,
+    color: resolvedTitleColor || undefined,
+  };
+
+  const bodyCSS: React.CSSProperties = {
+    fontFamily: bodyStyle.fontFamily,
+    fontSize: bodyStyle.fontSize,
+    fontWeight: bodyStyle.fontWeight,
+    fontStyle: bodyStyle.fontStyle,
+    textAlign: bodyStyle.textAlign,
+    color: resolvedBodyColor || undefined,
+  };
+
+  // Align flex items based on the text alignment (default to right alignment for left sidebar)
+  const alignment = titleStyle.textAlign || bodyStyle.textAlign || "right";
+  const alignClass =
+    alignment === "left"
+      ? "items-start text-left"
+      : alignment === "center"
+      ? "items-center text-center"
+      : "items-end text-right";
 
   return (
     <div
       onClick={onClick}
       className={`
-        relative w-full flex flex-col items-end text-right group/section select-none cursor-pointer p-3.5 rounded-xl border border-transparent transition-all duration-300
+        relative w-full flex flex-col group/section select-none cursor-pointer p-3.5 rounded-xl border border-transparent transition-all duration-300
+        ${alignClass}
         ${hasBackground
           ? "hover:bg-black/20 hover:border-white/10"
           : "hover:bg-zinc-100/70 dark:hover:bg-zinc-800/40 hover:border-zinc-200/50 dark:hover:border-zinc-800/50"
@@ -47,7 +107,7 @@ export default function TextSection({
           }
         `}>
           <Edit3 className="w-2.5 h-2.5" />
-          Edit
+          Style
         </div>
       </div>
 
@@ -57,30 +117,32 @@ export default function TextSection({
         </span>
       ) : (
         <>
-          {title && (
+          {titleText && (
             <h4
+              style={titleCSS}
               className={`
-                font-serif text-base md:text-lg font-bold tracking-wide uppercase leading-tight mb-1 break-words w-full
-                ${hasBackground
+                uppercase leading-tight mb-1 break-words w-full transition-all duration-300
+                ${hasBackground && !titleStyle.color
                   ? "text-white drop-shadow-[0_1.5px_4px_rgba(0,0,0,0.8)]"
-                  : "text-zinc-900 dark:text-zinc-100"
+                  : !titleStyle.color ? "text-zinc-900 dark:text-zinc-100" : ""
                 }
               `}
             >
-              {title}
+              {titleText}
             </h4>
           )}
-          {body && (
+          {bodyText && (
             <p
+              style={bodyCSS}
               className={`
-                font-sans text-xs md:text-sm font-normal leading-relaxed break-words w-full
-                ${hasBackground
-                  ? "text-zinc-100/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]"
-                  : "text-zinc-600 dark:text-zinc-400"
+                leading-relaxed break-words w-full transition-all duration-300
+                ${hasBackground && !bodyStyle.color
+                  ? "text-zinc-200/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]"
+                  : !bodyStyle.color ? "text-zinc-655 dark:text-zinc-400" : ""
                 }
               `}
             >
-              {body}
+              {bodyText}
             </p>
           )}
           {link && (

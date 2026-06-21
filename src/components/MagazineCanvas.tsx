@@ -1,38 +1,87 @@
 "use client";
 
 import React, { useState, useRef, DragEvent, ChangeEvent } from "react";
-import { Upload, ImageIcon, Trash2, RefreshCw, X } from "lucide-react";
+import { Upload, ImageIcon, Trash2, RefreshCw, X, Settings } from "lucide-react";
 import HeroHeader from "./HeroHeader";
 import TextSection, { TextSectionData } from "./TextSection";
 import SectionsManager from "./SectionsManager";
+import TypographyControls, { StyleObject } from "./TypographyControls";
+
+const defaultHeaderStyle: StyleObject = {
+  fontFamily: "Didot, 'Didot LT STD', Bodoni, Georgia, serif",
+  fontSize: "48px",
+  fontWeight: "bold",
+  fontStyle: "normal",
+  textAlign: "center",
+  color: "",
+};
+
+const defaultTitleStyle: StyleObject = {
+  fontFamily: "Didot, 'Didot LT STD', Bodoni, Georgia, serif",
+  fontSize: "16px",
+  fontWeight: "bold",
+  fontStyle: "normal",
+  textAlign: "right",
+  color: "",
+};
+
+const defaultBodyStyle: StyleObject = {
+  fontFamily: "Arial, sans-serif",
+  fontSize: "12px",
+  fontWeight: "normal",
+  fontStyle: "normal",
+  textAlign: "right",
+  color: "",
+};
 
 export default function MagazineCanvas() {
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Component 2 State: Hero Header
-  const [heroHeader, setHeroHeader] = useState<{ text: string; link?: string }>({
+  // Component 2 State: Hero Header (Migrated with styles)
+  const [heroHeader, setHeroHeader] = useState<{
+    text: string;
+    link?: string;
+    style?: StyleObject;
+  }>({
     text: "",
+    style: defaultHeaderStyle,
   });
   const [isEditingInline, setIsEditingInline] = useState(false);
+  const [showHeaderStyle, setShowHeaderStyle] = useState(false);
 
-  // Component 3 State: Text Sections
+  // Component 3 & 4 State: Text Sections (Migrated with nested styles)
   const [sections, setSections] = useState<TextSectionData[]>([
     {
       id: "1",
-      title: "Inside This Issue",
-      body: "Discover the latest trends in digital design and architecture.",
+      title: {
+        text: "Inside This Issue",
+        style: { ...defaultTitleStyle },
+      },
+      body: {
+        text: "Discover the latest trends in digital design and architecture.",
+        style: { ...defaultBodyStyle },
+      },
       link: "https://example.com/trends",
     },
     {
       id: "2",
-      title: "Special Feature",
-      body: "An exclusive interview with the pioneers of minimal typography.",
+      title: {
+        text: "Special Feature",
+        style: { ...defaultTitleStyle },
+      },
+      body: {
+        text: "An exclusive interview with the pioneers of minimal typography.",
+        style: { ...defaultBodyStyle },
+      },
       link: "https://example.com/interview",
     },
   ]);
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
+  
+  // Tab within the Section Editor Modal: "content" | "titleStyle" | "bodyStyle"
+  const [modalTab, setModalTab] = useState<"content" | "titleStyle" | "bodyStyle">("content");
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -91,12 +140,18 @@ export default function MagazineCanvas() {
   const handleAddSection = () => {
     const newSection: TextSectionData = {
       id: Date.now().toString(),
-      title: "New Headline",
-      body: "Brief description of the story goes here.",
+      title: {
+        text: "New Headline",
+        style: { ...defaultTitleStyle },
+      },
+      body: {
+        text: "Brief description of the story goes here.",
+        style: { ...defaultBodyStyle },
+      },
       link: "",
     };
     setSections([...sections, newSection]);
-    setEditingSectionId(newSection.id);
+    openSectionEditor(newSection.id);
   };
 
   const handleUpdateSection = (id: string, updatedFields: Partial<TextSectionData>) => {
@@ -108,6 +163,11 @@ export default function MagazineCanvas() {
     if (editingSectionId === id) {
       setEditingSectionId(null);
     }
+  };
+
+  const openSectionEditor = (id: string) => {
+    setEditingSectionId(id);
+    setModalTab("content");
   };
 
   return (
@@ -187,7 +247,7 @@ export default function MagazineCanvas() {
                 hasBackground={!!backgroundImage}
                 onClick={(e) => {
                   e.stopPropagation();
-                  setEditingSectionId(section.id);
+                  openSectionEditor(section.id);
                 }}
               />
             ))}
@@ -262,8 +322,27 @@ export default function MagazineCanvas() {
                 className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
               />
             </div>
+
+            {/* Typography expander button */}
+            <button
+              onClick={() => setShowHeaderStyle(!showHeaderStyle)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700/80 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg text-xs font-semibold transition-all mt-2"
+            >
+              <Settings className="w-3.5 h-3.5" />
+              {showHeaderStyle ? "Hide Typography Style" : "Headline Typography Style"}
+            </button>
+
+            {/* Typography Editor Panel */}
+            {showHeaderStyle && (
+              <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-800/60 animate-in fade-in duration-200">
+                <TypographyControls
+                  style={heroHeader.style || defaultHeaderStyle}
+                  onChange={(newStyle) => setHeroHeader({ ...heroHeader, style: newStyle })}
+                />
+              </div>
+            )}
             
-            <p className="text-[11px] text-zinc-400 dark:text-zinc-500 italic">
+            <p className="text-[11px] text-zinc-400 dark:text-zinc-500 italic mt-2">
               Tip: You can also click directly on the canvas title to edit it inline.
             </p>
           </div>
@@ -290,65 +369,133 @@ export default function MagazineCanvas() {
             className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 w-full max-w-md rounded-2xl shadow-2xl p-6 transform transition-all scale-100 animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Modal Header */}
             <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800/60 mb-4">
               <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wide">
                 Edit Sidebar Section
               </h3>
               <button
                 onClick={() => setEditingSectionId(null)}
-                className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors animate-all"
+                className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
+            {/* Modal Tabs: Content vs styles */}
+            <div className="flex border-b border-zinc-100 dark:border-zinc-800/60 mb-4 text-[10px] font-bold uppercase tracking-wider">
+              <button
+                onClick={() => setModalTab("content")}
+                className={`flex-1 pb-2 border-b-2 text-center transition-colors ${
+                  modalTab === "content"
+                    ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
+                    : "border-transparent text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300"
+                }`}
+              >
+                Content
+              </button>
+              <button
+                onClick={() => setModalTab("titleStyle")}
+                className={`flex-1 pb-2 border-b-2 text-center transition-colors ${
+                  modalTab === "titleStyle"
+                    ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
+                    : "border-transparent text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300"
+                }`}
+              >
+                Title Style
+              </button>
+              <button
+                onClick={() => setModalTab("bodyStyle")}
+                className={`flex-1 pb-2 border-b-2 text-center transition-colors ${
+                  modalTab === "bodyStyle"
+                    ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
+                    : "border-transparent text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300"
+                }`}
+              >
+                Body Style
+              </button>
+            </div>
+
+            {/* Modal Body & Tab Contents */}
             {(() => {
               const section = sections.find((s) => s.id === editingSectionId);
               if (!section) return null;
+              
               return (
                 <div className="space-y-4">
-                  <div>
-                    <label htmlFor="modal-section-title" className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
-                      Section Title
-                    </label>
-                    <input
-                      id="modal-section-title"
-                      type="text"
-                      placeholder="Section Title (Optional)"
-                      value={section.title || ""}
-                      onChange={(e) => handleUpdateSection(section.id, { title: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-                    />
-                  </div>
+                  {modalTab === "content" && (
+                    <div className="space-y-4 animate-in fade-in duration-150">
+                      <div>
+                        <label htmlFor="modal-section-title" className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
+                          Section Title
+                        </label>
+                        <input
+                          id="modal-section-title"
+                          type="text"
+                          placeholder="Section Title (Optional)"
+                          value={section.title?.text || ""}
+                          onChange={(e) => handleUpdateSection(section.id, { 
+                            title: { text: e.target.value, style: section.title?.style } 
+                          })}
+                          className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                        />
+                      </div>
 
-                  <div>
-                    <label htmlFor="modal-section-body" className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
-                      Body Content
-                    </label>
-                    <textarea
-                      id="modal-section-body"
-                      placeholder="Section Body Content (Optional)"
-                      value={section.body || ""}
-                      onChange={(e) => handleUpdateSection(section.id, { body: e.target.value })}
-                      rows={3}
-                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"
-                    />
-                  </div>
+                      <div>
+                        <label htmlFor="modal-section-body" className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
+                          Body Content
+                        </label>
+                        <textarea
+                          id="modal-section-body"
+                          placeholder="Section Body Content (Optional)"
+                          value={section.body?.text || ""}
+                          onChange={(e) => handleUpdateSection(section.id, { 
+                            body: { text: e.target.value, style: section.body?.style } 
+                          })}
+                          rows={3}
+                          className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-955 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"
+                        />
+                      </div>
 
-                  <div>
-                    <label htmlFor="modal-section-link" className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
-                      Link URL (Optional)
-                    </label>
-                    <input
-                      id="modal-section-link"
-                      type="url"
-                      placeholder="https://example.com/link"
-                      value={section.link || ""}
-                      onChange={(e) => handleUpdateSection(section.id, { link: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-                    />
-                  </div>
+                      <div>
+                        <label htmlFor="modal-section-link" className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
+                          Link URL (Optional)
+                        </label>
+                        <input
+                          id="modal-section-link"
+                          type="url"
+                          placeholder="https://example.com/link"
+                          value={section.link || ""}
+                          onChange={(e) => handleUpdateSection(section.id, { link: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-955 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                        />
+                      </div>
+                    </div>
+                  )}
 
+                  {modalTab === "titleStyle" && (
+                    <div className="animate-in fade-in duration-150">
+                      <TypographyControls
+                        style={section.title?.style || defaultTitleStyle}
+                        onChange={(newStyle) => handleUpdateSection(section.id, {
+                          title: { text: section.title?.text || "", style: newStyle }
+                        })}
+                      />
+                    </div>
+                  )}
+
+                  {modalTab === "bodyStyle" && (
+                    <div className="animate-in fade-in duration-150">
+                      <TypographyControls
+                        style={section.body?.style || defaultBodyStyle}
+                        onChange={(newStyle) => handleUpdateSection(section.id, {
+                          body: { text: section.body?.text || "", style: newStyle }
+                        })}
+                      />
+                    </div>
+                  )}
+
+                  {/* Modal Footer Controls */}
                   <div className="flex justify-end gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800/60 mt-4">
                     <button
                       onClick={() => {

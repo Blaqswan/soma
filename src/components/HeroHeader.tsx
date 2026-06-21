@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import { StyleObject } from "./TypographyControls";
 
 interface HeroHeaderProps {
   value: {
     text: string;
     link?: string;
+    style?: StyleObject;
   };
-  onChange: (value: { text: string; link?: string }) => void;
+  onChange: (value: { text: string; link?: string; style?: StyleObject }) => void;
   isEditingInline: boolean;
   setIsEditingInline: (editing: boolean) => void;
   hasBackground: boolean;
@@ -39,6 +41,36 @@ export default function HeroHeader({
     }
   };
 
+  // Default header style fallbacks
+  const style = value.style || {
+    fontFamily: "Didot, 'Didot LT STD', Bodoni, Georgia, serif",
+    fontSize: "32px",
+    fontWeight: "bold",
+    fontStyle: "normal",
+    textAlign: "center",
+    color: "",
+  };
+
+  // If a custom color is not set, fallback to high-contrast white on background, or theme default
+  const resolvedColor = style.color || (hasBackground ? "#ffffff" : "");
+
+  const inlineStyles: React.CSSProperties = {
+    fontFamily: style.fontFamily,
+    fontSize: style.fontSize,
+    fontWeight: style.fontWeight,
+    fontStyle: style.fontStyle,
+    textAlign: style.textAlign,
+    color: resolvedColor || undefined,
+  };
+
+  // Map text alignment to flex justification for centering/aligning inline layouts
+  const justifyClass =
+    style.textAlign === "left"
+      ? "justify-start text-left"
+      : style.textAlign === "right"
+      ? "justify-end text-right"
+      : "justify-center text-center";
+
   return (
     <div
       onClick={(e) => {
@@ -46,7 +78,8 @@ export default function HeroHeader({
         setIsEditingInline(true);
       }}
       className={`
-        absolute top-8 left-0 right-0 w-full min-h-[90px] flex items-center justify-center px-6 z-20 group transition-all duration-300 cursor-text
+        absolute top-8 left-0 right-0 w-full min-h-[90px] flex items-center px-6 z-20 group transition-all duration-300 cursor-text
+        ${justifyClass}
         ${!value.text && !isEditingInline 
           ? "border-2 border-dashed border-zinc-300 dark:border-zinc-700/60 hover:border-indigo-500/70 rounded-xl bg-zinc-100/50 dark:bg-zinc-800/10" 
           : "hover:bg-black/5 dark:hover:bg-white/5 rounded-xl border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800"
@@ -63,10 +96,11 @@ export default function HeroHeader({
           onBlur={() => setIsEditingInline(false)}
           onKeyDown={handleKeyDown}
           placeholder="Add Magazine Title"
-          className="w-full text-center bg-transparent border-none outline-none font-serif text-3xl font-extrabold tracking-widest focus:ring-0 uppercase p-2 text-zinc-900 dark:text-zinc-100"
+          style={inlineStyles}
+          className="w-full bg-transparent border-none outline-none focus:ring-0 uppercase p-2 tracking-widest"
         />
       ) : (
-        <div className="w-full text-center py-2">
+        <div className={`w-full py-2 ${justifyClass} flex`}>
           {value.text ? (
             <div className="relative group/title inline-block max-w-full">
               {value.link ? (
@@ -75,11 +109,12 @@ export default function HeroHeader({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
+                  style={inlineStyles}
                   className={`
-                    font-serif text-3xl md:text-4xl font-extrabold tracking-widest uppercase break-words block hover:underline transition-all duration-300
-                    ${hasBackground 
+                    uppercase break-words block hover:underline transition-all duration-300 tracking-widest
+                    ${hasBackground && !style.color
                       ? "text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" 
-                      : "text-zinc-950 dark:text-white"
+                      : !style.color ? "text-zinc-950 dark:text-white" : ""
                     }
                   `}
                 >
@@ -87,11 +122,12 @@ export default function HeroHeader({
                 </a>
               ) : (
                 <h2
+                  style={inlineStyles}
                   className={`
-                    font-serif text-3xl md:text-4xl font-extrabold tracking-widest uppercase break-words transition-all duration-300
-                    ${hasBackground 
+                    uppercase break-words transition-all duration-300 tracking-widest
+                    ${hasBackground && !style.color
                       ? "text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" 
-                      : "text-zinc-950 dark:text-white"
+                      : !style.color ? "text-zinc-950 dark:text-white" : ""
                     }
                   `}
                 >
