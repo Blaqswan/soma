@@ -2,11 +2,18 @@
 
 import React, { useState, useRef, DragEvent, ChangeEvent } from "react";
 import { Upload, ImageIcon, Trash2, RefreshCw } from "lucide-react";
+import HeroHeader from "./HeroHeader";
 
 export default function MagazineCanvas() {
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Component 2 State: Hero Header
+  const [heroHeader, setHeroHeader] = useState<{ text: string; link?: string }>({
+    text: "",
+  });
+  const [isEditingInline, setIsEditingInline] = useState(false);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -117,9 +124,18 @@ export default function MagazineCanvas() {
           {/* Inner border glow for premium styling */}
           <div className="absolute inset-0 rounded-2xl border border-white/10 pointer-events-none" />
 
+          {/* Hero Header component overlays on top */}
+          <HeroHeader
+            value={heroHeader}
+            onChange={setHeroHeader}
+            isEditingInline={isEditingInline}
+            setIsEditingInline={setIsEditingInline}
+            hasBackground={!!backgroundImage}
+          />
+
           {/* Canvas content when no image is uploaded */}
           {!backgroundImage && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center pt-28">
               <div className="flex items-center justify-center w-16 h-16 mb-6 rounded-2xl bg-white dark:bg-zinc-900 shadow-md border border-zinc-200/50 dark:border-zinc-800/50 text-zinc-500 dark:text-zinc-400 transition-transform group-hover:scale-110">
                 <Upload className="w-6 h-6 animate-pulse text-indigo-500 dark:text-indigo-400" />
               </div>
@@ -137,13 +153,59 @@ export default function MagazineCanvas() {
 
           {/* Interactive hover overlay when image IS uploaded */}
           {backgroundImage && (
-            <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pt-28">
               <div className="flex items-center gap-2 px-4 py-2 bg-white/95 dark:bg-zinc-900/95 rounded-full shadow-lg text-sm font-semibold text-zinc-800 dark:text-zinc-200">
                 <ImageIcon className="w-4 h-4 text-indigo-500" />
                 Change Cover Image
               </div>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Editor Panel below the canvas */}
+      <div className="w-full max-w-[480px] sm:max-w-[520px] md:max-w-[560px] lg:max-w-[600px] xl:max-w-[640px] mt-8 px-2">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/80 rounded-2xl p-6 shadow-md transition-all duration-300">
+          <div className="flex items-center gap-2 mb-4 border-b border-zinc-100 dark:border-zinc-800/60 pb-3">
+            <span className="w-2.5 h-2.5 rounded-full bg-indigo-600" />
+            <h4 className="text-sm font-bold uppercase tracking-wider text-zinc-800 dark:text-zinc-200">
+              Header Cover Editor
+            </h4>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="header-text" className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
+                Headline Text
+              </label>
+              <input
+                id="header-text"
+                type="text"
+                placeholder="Enter magazine title..."
+                value={heroHeader.text}
+                onChange={(e) => setHeroHeader({ ...heroHeader, text: e.target.value })}
+                className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="header-link" className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
+                Headline Link (Optional)
+              </label>
+              <input
+                id="header-link"
+                type="url"
+                placeholder="https://example.com"
+                value={heroHeader.link || ""}
+                onChange={(e) => setHeroHeader({ ...heroHeader, link: e.target.value })}
+                className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+              />
+            </div>
+            
+            <p className="text-[11px] text-zinc-400 dark:text-zinc-500 italic">
+              Tip: You can also click directly on the canvas title to edit it inline.
+            </p>
+          </div>
         </div>
       </div>
     </div>
