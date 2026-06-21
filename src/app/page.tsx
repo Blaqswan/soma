@@ -1,6 +1,98 @@
+"use client";
+
+import React, { useState } from "react";
 import MagazineCanvas from "@/components/MagazineCanvas";
+import { TextSectionData } from "@/components/TextSection";
+import { StyleObject } from "@/components/TypographyControls";
+import HtmlExport from "@/components/HtmlExport";
+import { generateHtml } from "@/lib/htmlGenerator";
+import { FileCode, Save, Sparkles } from "lucide-react";
 
 export default function Home() {
+  // LIFTED STATES from MagazineCanvas
+  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+
+  const [heroHeader, setHeroHeader] = useState<{
+    text: string;
+    link?: string;
+    style?: StyleObject;
+  }>({
+    text: "SOMA",
+    style: {
+      fontFamily: "Didot, 'Didot LT STD', Bodoni, Georgia, serif",
+      fontSize: "48px",
+      fontWeight: "bold",
+      fontStyle: "normal",
+      textAlign: "center",
+      color: "",
+    },
+  });
+
+  const [sections, setSections] = useState<TextSectionData[]>([
+    {
+      id: "1",
+      title: {
+        text: "Inside This Issue",
+        style: {
+          fontFamily: "Didot, 'Didot LT STD', Bodoni, Georgia, serif",
+          fontSize: "16px",
+          fontWeight: "bold",
+          fontStyle: "normal",
+          textAlign: "right",
+          color: "",
+        },
+      },
+      body: {
+        text: "Discover the latest trends in digital design and architecture.",
+        style: {
+          fontFamily: "Arial, sans-serif",
+          fontSize: "12px",
+          fontWeight: "normal",
+          fontStyle: "normal",
+          textAlign: "right",
+          color: "",
+        },
+      },
+      link: "https://example.com/trends",
+    },
+    {
+      id: "2",
+      title: {
+        text: "Special Feature",
+        style: {
+          fontFamily: "Didot, 'Didot LT STD', Bodoni, Georgia, serif",
+          fontSize: "16px",
+          fontWeight: "bold",
+          fontStyle: "normal",
+          textAlign: "right",
+          color: "",
+        },
+      },
+      body: {
+        text: "An exclusive interview with the pioneers of minimal typography.",
+        style: {
+          fontFamily: "Arial, sans-serif",
+          fontSize: "12px",
+          fontWeight: "normal",
+          fontStyle: "normal",
+          textAlign: "right",
+          color: "",
+        },
+      },
+      link: "https://example.com/interview",
+    },
+  ]);
+
+  // Export Dialog States
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const [htmlCode, setHtmlCode] = useState("");
+
+  const handleExport = () => {
+    const generated = generateHtml({ heroHeader, sections, backgroundImage });
+    setHtmlCode(generated);
+    setIsExportOpen(true);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 selection:bg-indigo-500 selection:text-white">
       {/* Header */}
@@ -14,13 +106,43 @@ export default function Home() {
             <p className="text-xs text-zinc-500 dark:text-zinc-400">Newsletter Designer</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400">
-            Component 1
-          </span>
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
-            Active
-          </span>
+
+        {/* Toolbar controls */}
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Status Indicators */}
+          <div className="hidden sm:flex items-center gap-2 mr-2">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400">
+              Component 1
+            </span>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+              Active
+            </span>
+          </div>
+          
+          {/* Editor Action Buttons */}
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => alert("Save Draft feature is coming soon!")}
+              className="flex items-center gap-1.5 px-3.5 py-2 border border-zinc-200 dark:border-zinc-800/60 bg-white hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-850 text-zinc-650 hover:text-zinc-850 dark:text-zinc-350 dark:hover:text-zinc-150 rounded-xl text-xs font-bold shadow-xs hover:shadow transition-all"
+            >
+              <Save className="w-3.5 h-3.5" />
+              Save Draft
+            </button>
+            <button 
+              onClick={() => alert("Publish Cover feature is coming soon!")}
+              className="flex items-center gap-1.5 px-3.5 py-2 border border-zinc-200 dark:border-zinc-800/60 bg-white hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-850 text-zinc-650 hover:text-zinc-850 dark:text-zinc-350 dark:hover:text-zinc-150 rounded-xl text-xs font-bold shadow-xs hover:shadow transition-all"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-indigo-550 dark:text-indigo-400" />
+              Publish
+            </button>
+            <button 
+              onClick={handleExport}
+              className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm hover:shadow transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <FileCode className="w-3.5 h-3.5" />
+              Export HTML
+            </button>
+          </div>
         </div>
       </header>
 
@@ -29,10 +151,10 @@ export default function Home() {
         {/* Left Info Panel */}
         <div className="w-full lg:w-5/12 flex flex-col gap-6 text-center lg:text-left">
           <div className="space-y-3">
-            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl bg-gradient-to-r from-zinc-900 to-zinc-600 dark:from-zinc-50 dark:to-zinc-400 bg-clip-text text-transparent">
+            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl bg-gradient-to-r from-zinc-900 to-zinc-600 dark:from-zinc-55 dark:to-zinc-400 bg-clip-text text-transparent">
               Magazine Canvas
             </h2>
-            <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-lg mx-auto lg:mx-0">
+            <p className="text-lg text-zinc-650 dark:text-zinc-400 max-w-lg mx-auto lg:mx-0">
               A premium, high-fidelity canvas component optimized for designing print-quality covers.
             </p>
           </div>
@@ -41,7 +163,7 @@ export default function Home() {
             <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider">
               Canvas Specifications
             </h3>
-            <ul className="space-y-3 text-sm text-zinc-600 dark:text-zinc-400">
+            <ul className="space-y-3 text-sm text-zinc-650 dark:text-zinc-400">
               <li className="flex items-center gap-3">
                 <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
                 <span>Aspect Ratio: <strong>8.5" × 11"</strong> (Letter Portrait)</span>
@@ -68,14 +190,28 @@ export default function Home() {
 
         {/* Right Canvas Panel */}
         <div className="w-full lg:w-7/12 flex items-center justify-center">
-          <MagazineCanvas />
+          <MagazineCanvas
+            backgroundImage={backgroundImage}
+            setBackgroundImage={setBackgroundImage}
+            heroHeader={heroHeader}
+            setHeroHeader={setHeroHeader}
+            sections={sections}
+            setSections={setSections}
+          />
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="w-full py-6 text-center text-xs text-zinc-400 dark:text-zinc-500 border-t border-zinc-200/50 dark:border-zinc-800/50 mt-auto">
+      <footer className="w-full py-6 text-center text-xs text-zinc-400 dark:text-zinc-550 border-t border-zinc-200/50 dark:border-zinc-800/50 mt-auto">
         SOMA Editor • Powered by Next.js & Tailwind CSS
       </footer>
+
+      {/* Export Dialog overlay */}
+      <HtmlExport
+        isOpen={isExportOpen}
+        onClose={() => setIsExportOpen(false)}
+        htmlCode={htmlCode}
+      />
     </div>
   );
 }

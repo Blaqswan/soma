@@ -7,6 +7,25 @@ import TextSection, { TextSectionData } from "./TextSection";
 import SectionsManager from "./SectionsManager";
 import TypographyControls, { StyleObject } from "./TypographyControls";
 
+export interface MagazineCanvasProps {
+  backgroundImage: string | null;
+  setBackgroundImage: (img: string | null) => void;
+  heroHeader: {
+    text: string;
+    link?: string;
+    style?: StyleObject;
+  };
+  setHeroHeader: React.Dispatch<
+    React.SetStateAction<{
+      text: string;
+      link?: string;
+      style?: StyleObject;
+    }>
+  >;
+  sections: TextSectionData[];
+  setSections: React.Dispatch<React.SetStateAction<TextSectionData[]>>;
+}
+
 const defaultHeaderStyle: StyleObject = {
   fontFamily: "Didot, 'Didot LT STD', Bodoni, Georgia, serif",
   fontSize: "48px",
@@ -34,50 +53,20 @@ const defaultBodyStyle: StyleObject = {
   color: "",
 };
 
-export default function MagazineCanvas() {
-  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+export default function MagazineCanvas({
+  backgroundImage,
+  setBackgroundImage,
+  heroHeader,
+  setHeroHeader,
+  sections,
+  setSections,
+}: MagazineCanvasProps) {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Component 2 State: Hero Header (Migrated with styles)
-  const [heroHeader, setHeroHeader] = useState<{
-    text: string;
-    link?: string;
-    style?: StyleObject;
-  }>({
-    text: "",
-    style: defaultHeaderStyle,
-  });
+  // Local UI-only States
   const [isEditingInline, setIsEditingInline] = useState(false);
   const [showHeaderStyle, setShowHeaderStyle] = useState(false);
-
-  // Component 3 & 4 State: Text Sections (Migrated with nested styles)
-  const [sections, setSections] = useState<TextSectionData[]>([
-    {
-      id: "1",
-      title: {
-        text: "Inside This Issue",
-        style: { ...defaultTitleStyle },
-      },
-      body: {
-        text: "Discover the latest trends in digital design and architecture.",
-        style: { ...defaultBodyStyle },
-      },
-      link: "https://example.com/trends",
-    },
-    {
-      id: "2",
-      title: {
-        text: "Special Feature",
-        style: { ...defaultTitleStyle },
-      },
-      body: {
-        text: "An exclusive interview with the pioneers of minimal typography.",
-        style: { ...defaultBodyStyle },
-      },
-      link: "https://example.com/interview",
-    },
-  ]);
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
   
   // Tab within the Section Editor Modal: "content" | "titleStyle" | "bodyStyle"
@@ -389,7 +378,7 @@ export default function MagazineCanvas() {
                 className={`flex-1 pb-2 border-b-2 text-center transition-colors ${
                   modalTab === "content"
                     ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-                    : "border-transparent text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300"
+                    : "border-transparent text-zinc-400 dark:text-zinc-500 hover:text-zinc-650 dark:hover:text-zinc-350"
                 }`}
               >
                 Content
@@ -399,7 +388,7 @@ export default function MagazineCanvas() {
                 className={`flex-1 pb-2 border-b-2 text-center transition-colors ${
                   modalTab === "titleStyle"
                     ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-                    : "border-transparent text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300"
+                    : "border-transparent text-zinc-400 dark:text-zinc-500 hover:text-zinc-655 dark:hover:text-zinc-350"
                 }`}
               >
                 Title Style
@@ -409,7 +398,7 @@ export default function MagazineCanvas() {
                 className={`flex-1 pb-2 border-b-2 text-center transition-colors ${
                   modalTab === "bodyStyle"
                     ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-                    : "border-transparent text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300"
+                    : "border-transparent text-zinc-400 dark:text-zinc-500 hover:text-zinc-655 dark:hover:text-zinc-350"
                 }`}
               >
                 Body Style
@@ -467,7 +456,7 @@ export default function MagazineCanvas() {
                           placeholder="https://example.com/link"
                           value={section.link || ""}
                           onChange={(e) => handleUpdateSection(section.id, { link: e.target.value })}
-                          className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-955 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                          className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-955 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-550/20 focus:border-indigo-500 transition-all"
                         />
                       </div>
                     </div>
@@ -502,7 +491,7 @@ export default function MagazineCanvas() {
                         handleRemoveSection(section.id);
                         setEditingSectionId(null);
                       }}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-xs font-bold rounded-xl transition-all"
+                      className="flex items-center gap-1.5 px-4 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-955/20 dark:hover:bg-rose-955/40 text-rose-600 dark:text-rose-400 text-xs font-bold rounded-xl transition-all"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       Delete Section
