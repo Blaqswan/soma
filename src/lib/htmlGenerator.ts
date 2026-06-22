@@ -69,7 +69,7 @@ export function generateHtml({ heroHeader, sections, backgroundImage }: Generato
       fontSize: "16px",
       fontWeight: "bold",
       fontStyle: "normal",
-      textAlign: "right",
+      textAlign: "left",
       color: "",
     };
 
@@ -78,21 +78,21 @@ export function generateHtml({ heroHeader, sections, backgroundImage }: Generato
       fontSize: "12px",
       fontWeight: "normal",
       fontStyle: "normal",
-      textAlign: "right",
+      textAlign: "left",
       color: "",
     };
 
-    const tAlign = titleStyle.textAlign || "right";
+    const tAlign = titleStyle.textAlign || "left";
     const tColor = titleStyle.color || (backgroundImage ? "#ffffff" : "#18181b");
     const tShadow = backgroundImage && !titleStyle.color ? "text-shadow: 0 1.5px 4px rgba(0,0,0,0.8);" : "";
     const titleInlineStyles = `font-family: ${titleStyle.fontFamily}; font-size: ${titleStyle.fontSize}; font-weight: ${titleStyle.fontWeight}; font-style: ${titleStyle.fontStyle}; text-align: ${tAlign}; color: ${tColor}; text-transform: uppercase; line-height: 1.25; ${tShadow}`;
 
-    const bAlign = bodyStyle.textAlign || "right";
+    const bAlign = bodyStyle.textAlign || "left";
     const bColor = bodyStyle.color || (backgroundImage ? "#e4e4e7" : "#4b5563");
     const bShadow = backgroundImage && !bodyStyle.color ? "text-shadow: 0 1px 3px rgba(0,0,0,0.7);" : "";
     const bodyInlineStyles = `font-family: ${bodyStyle.fontFamily}; font-size: ${bodyStyle.fontSize}; font-weight: ${bodyStyle.fontWeight}; font-style: ${bodyStyle.fontStyle}; text-align: ${bAlign}; color: ${bColor}; line-height: 1.45; ${bShadow}`;
 
-    const sectionAlignment = titleStyle.textAlign || bodyStyle.textAlign || "right";
+    const sectionAlignment = titleStyle.textAlign || bodyStyle.textAlign || "left";
 
     sectionsHtml += `
       <tr>
@@ -147,7 +147,7 @@ export function generateHtml({ heroHeader, sections, backgroundImage }: Generato
   if (!sectionsHtml) {
     sectionsHtml = `
       <tr>
-        <td style="font-family: sans-serif; font-size: 11px; color: ${backgroundImage ? "#cccccc" : "#888888"}; font-style: italic; text-align: right;" align="right">
+        <td style="font-family: sans-serif; font-size: 11px; color: ${backgroundImage ? "#cccccc" : "#888888"}; font-style: italic; text-align: left;" align="left">
           [No content sections added]
         </td>
       </tr>
@@ -226,7 +226,7 @@ export function generateHtml({ heroHeader, sections, backgroundImage }: Generato
                 <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse: collapse;">
                   <tr>
                     <!-- Left Sidebar Column (width 260px) -->
-                    <td width="260" valign="top" style="width: 260px; text-align: right;">
+                    <td width="260" valign="top" style="width: 260px; text-align: left;">
                       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse: collapse;">
                         ${sectionsHtml}
                       </table>

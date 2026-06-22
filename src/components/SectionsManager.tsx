@@ -17,7 +17,7 @@ const defaultTitleStyle: StyleObject = {
   fontSize: "16px",
   fontWeight: "bold",
   fontStyle: "normal",
-  textAlign: "right",
+  textAlign: "left",
   color: "",
 };
 
@@ -26,7 +26,7 @@ const defaultBodyStyle: StyleObject = {
   fontSize: "12px",
   fontWeight: "normal",
   fontStyle: "normal",
-  textAlign: "right",
+  textAlign: "left",
   color: "",
 };
 

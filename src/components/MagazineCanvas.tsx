@@ -35,21 +35,23 @@ const defaultHeaderStyle: StyleObject = {
   color: "",
 };
 
+// Changed default text alignment from right to left
 const defaultTitleStyle: StyleObject = {
   fontFamily: "Didot, 'Didot LT STD', Bodoni, Georgia, serif",
   fontSize: "16px",
   fontWeight: "bold",
   fontStyle: "normal",
-  textAlign: "right",
+  textAlign: "left",
   color: "",
 };
 
+// Changed default text alignment from right to left
 const defaultBodyStyle: StyleObject = {
   fontFamily: "Arial, sans-serif",
   fontSize: "12px",
   fontWeight: "normal",
   fontStyle: "normal",
-  textAlign: "right",
+  textAlign: "left",
   color: "",
 };
 
@@ -183,7 +185,7 @@ export default function MagazineCanvas({
           <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800" />
           <button
             onClick={removeImage}
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold text-rose-600 dark:text-rose-450 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
           >
             <Trash2 className="w-3.5 h-3.5" />
             Remove Image
@@ -224,10 +226,10 @@ export default function MagazineCanvas({
             hasBackground={!!backgroundImage}
           />
 
-          {/* Left Sidebar Region for Text Sections */}
+          {/* Left Sidebar Region for Text Sections (starts at top: 50% midpoint, double gap spacer) */}
           <div 
             onClick={(e) => e.stopPropagation()} // Don't trigger background image upload
-            className="absolute left-4 sm:left-6 top-32 sm:top-36 bottom-6 w-[180px] sm:w-[220px] md:w-[260px] flex flex-col justify-start gap-3 sm:gap-4 z-20 overflow-y-auto pointer-events-auto pr-1"
+            className="absolute left-4 sm:left-6 top-[50%] bottom-6 w-[180px] sm:w-[220px] md:w-[260px] flex flex-col justify-start gap-6 sm:gap-8 z-20 overflow-y-auto pointer-events-auto pr-1"
           >
             {sections.map((section) => (
               <TextSection
@@ -388,7 +390,7 @@ export default function MagazineCanvas({
                 className={`flex-1 pb-2 border-b-2 text-center transition-colors ${
                   modalTab === "titleStyle"
                     ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-                    : "border-transparent text-zinc-400 dark:text-zinc-500 hover:text-zinc-655 dark:hover:text-zinc-350"
+                    : "border-transparent text-zinc-400 dark:text-zinc-500 hover:text-zinc-650 dark:hover:text-zinc-350"
                 }`}
               >
                 Title Style
@@ -456,7 +458,7 @@ export default function MagazineCanvas({
                           placeholder="https://example.com/link"
                           value={section.link || ""}
                           onChange={(e) => handleUpdateSection(section.id, { link: e.target.value })}
-                          className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-955 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-550/20 focus:border-indigo-500 transition-all"
+                          className="w-full px-4 py-2.5 bg-zinc-50 dark:bg-zinc-955 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-medium text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
                         />
                       </div>
                     </div>
@@ -491,7 +493,7 @@ export default function MagazineCanvas({
                         handleRemoveSection(section.id);
                         setEditingSectionId(null);
                       }}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-955/20 dark:hover:bg-rose-955/40 text-rose-600 dark:text-rose-400 text-xs font-bold rounded-xl transition-all"
+                      className="flex items-center gap-1.5 px-4 py-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-955/20 dark:hover:bg-rose-955/40 text-rose-600 dark:text-rose-455 text-xs font-bold rounded-xl transition-all"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       Delete Section
